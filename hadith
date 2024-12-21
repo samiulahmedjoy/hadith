@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+
+keyword="$1"
+filename="$HOME/.local/share/hadith/main-hadith.txt"
+
+[ -z "$keyword" ] && echo "empty keyword" && exit 1;
+[ -z "$filename" ] && echo "empty filename" && exit 1;
+
+awk -v word="$keyword" '/^Sahih\sal-Bukhari|^Sahih\sMuslim|^Sunan\san-Nasa|^Jami`\sat-Tirmidhi|^Sunan\sIbn\sMajah\s|^Sunan\sAbu\sDawud\s/ { IGNORECASE=1; inblock = 1; block = "" } inblock { IGNORECASE=1; block = block (block == "" ? "" : ORS) $0 } /^In-book\sreference\s\s/ && block ~ word { print block"\n"; inblock = 0 }' $filename | cat -s | less
