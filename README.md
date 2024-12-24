@@ -1,6 +1,6 @@
 ## Hadith
 
-Read the hadith from command line in a Gnu/Linux Environment
+## Read the hadith from command line in a Gnu/Linux Environment
 
 The `hadith` cli contains the English translations taken from [sunnah.com](https://sunnah.com) of the main 6 books of hadith;
 
@@ -66,4 +66,4 @@ You can either replace the `filename` variable on the `hadith` shell script to b
     -------------
 ```
 
-**For easy installation I've made a make file. Just run make install to install the application on your local dir and local user**
+**For easy installation I've made a make file. Just run make install to install the application on your local dir as local user**
