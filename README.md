@@ -4,66 +4,56 @@
 
 The `hadith` cli contains the English translations taken from [sunnah.com](https://sunnah.com) of the main 6 books of hadith;
 
-1. Sahih Al-Bukhari (Consists of 97 books)
+1. Sahih Al-Bukhari (Consists of 97 sections)
 
-2. Sahih Muslim (Consists of 56 books)
+2. Sahih Muslim (Consists of 56 sections)
 
-3. Sunan an-Nasai (Consists of 51 books)
+3. Sunan an-Nasai (Consists of 51 sections)
 
-4. Sunan Abu-Dawud (Consists of 43 books)
+4. Sunan Abu-Dawud (Consists of 43 sections)
 
-5. Jami at-Tirmidhi (Consists of 49 books)
+5. Jami at-Tirmidhi (Consists of 49 sections)
 
-6. Sunan Ibn Majah (Consists of 37 books)
+6. Sunan Ibn Majah (Consists of 37 sections)
 
 ## Usage
 
-The usage is pretty straight-forward, you invoke the `hadith` command from the command line along with the `search argument`. That's it.
+[Tutorial Video](https://youtu.be/xskxN7mNYZI)
+
+The usage is pretty basic and straightforward;
 
 ```
-    $ hadith "bird"
+    Usage
+
+    -l or --list         Print out entire index of hadith's"
+    -s or --search       Search for a keyword"
+    -h or --hadith       Prints out specific section of hadith"
+    -b or --book         Prints out an entire book section"
+    -H or --Hadith       Print out an entire hadith"
+    -eg or --example     Print out list of examples"
+
 ```
 
-This will print out all the hadith/s containing the work "bird" in them. You can leave the quotation, but you need the quotation block when searching for multiple words/sentences. You can also search for a particular hadith;
+The Examples are also pretty straightforward;
 
 ```
-    $ hadith "bukhari 2320"
-        
-        Sahih al-Bukhari 2320
-        
-        Narrated Anas bin Malik:
-        
-        Allah's Messenger (ﷺ) said, "There is none amongst the Muslims who plants a
-        tree or sows seeds, and then a bird, or a person or an animal eats from it, but
-        is regarded as a charitable gift for him."
-        
-        -------------------------------------------------------------------
-        Reference                        : Sahih al-Bukhari 2320
-        In-book reference                : Book 41, Hadith 1
-        
-        (END)
-```
+    Examples
 
-This will print that specific hadith on your pager. You can also use regular expression to do searches too since it uses awk to search for terms. **Search terms are case insensitive**
+    hadith -s 'bird'             Will print all the hadiths containing phrase 'bird'"
+    hadith -h 'bukhari 5'        Will print out Sahih al-Bukhari 4th section"
+    hadith -b 'bukhari 5'        Will print out the 5th book from Bukhari hadith"
+    hadith -H 'bukhari'          Will print out the entire Bukhari hadith"
+
+```
 
 
 ## Requirements
 
-* Linux/Gnu Environment
+* Linux/Gnu Environment, could potentially run on Unix Environments too
 
-* Gnu version of awk
+* Gnu version of `awk` and `sed`
 
 
 ## Installation
 
-You can either replace the `filename` variable on the `hadith` shell script to be the PATH of the main-hadith.txt file, or you can also place the `main-hadith.txt` file on `.local/share/hadith` or `.local/share/` and change the `filename` variable on the `hadith` file to be something like this;
-
-```
-    $ cat hadith
-    keyword="$1"
-    filename="$HOME/.local/share/hadith/main-hadith.txt"
-
-    -------------
-```
-
-**For easy installation I've made a make file. Just run make install to install the application on your local dir as local user**
+If `$HOME/.local/bin/` is in your `$PATH` variable and `$HOME/.local/share/` exists, then just run `make install` from your terminal. It will install the program for current the user.

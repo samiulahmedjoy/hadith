@@ -1,9 +1,187 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
-keyword="$1"
-filename="$HOME/.local/share/hadith/main-hadith.txt"
+# some variables
+keyword="$2"
+filename="main-hadith.txt"
+pager="less"
+outline_filename="outline.txt"
 
-[ -z "$keyword" ] && echo "empty keyword" && exit 1;
-[ -z "$filename" ] && echo "empty filename" && exit 1;
+# check if the main filename exist
+if [ -f "$filename" ]; then
+	echo "file found"
+elif
+	[ -f "$HOME/.local/share/hadith/main-hadith.txt" ]; then
+	filename="$HOME/.local/share/hadith/main-hadith.txt"
+else
+	echo "Main file not found";
+	exit 1;
+fi
 
-awk -v word="$keyword" '/^Sahih\sal-Bukhari|^Sahih\sMuslim|^Sunan\san-Nasa|^Jami`\sat-Tirmidhi|^Sunan\sIbn\sMajah\s|^Sunan\sAbu\sDawud\s/ { IGNORECASE=1; inblock = 1; block = "" } inblock { IGNORECASE=1; block = block (block == "" ? "" : ORS) $0 } /^In-book\sreference\s\s/ && block ~ word { print block"\n"; inblock = 0 }' $filename | cat -s | less
+# check if the outline_filename exist
+if [ -f "$outline_filename" ]; then
+	echo "outline file found"
+elif
+	[ -f "$HOME/.local/share/hadith/outline.txt" ]; then
+	outline_filename="$HOME/.local/share/hadith/outline.txt"
+else
+	echo "Main file not found";
+	exit 1;
+fi
+
+# some functions
+usage() {
+	echo
+	echo "Usage"
+	echo
+	echo "  -l or --list         Print out entire index of hadith's"
+	echo "  -s or --search       Search for a keyword"
+	echo "  -h or --hadith       Prints out specific section of hadith"
+	echo "  -b or --book         Prints out an entire book section"
+	echo "  -H or --Hadith       Print out an entire hadith"
+	echo "  -eg or --example     Print out list of examples"
+	echo
+	exit
+}
+
+# Different examples
+example() {
+	echo
+	echo "Some examples"
+	echo
+	echo "  hadith -s 'bird'             Will print all the hadiths related to word bird"
+	echo "  hadith -h 'bukhari 5'        Will print out Sahih al-Bukhari 4th section"
+	echo "  hadith -b 'bukhari 5'        Will print out the 5th book from Bukhari hadith"
+	echo "  hadith -H 'bukhari'          Will print out the entire Bukhari hadith"
+	echo
+}
+
+# if the filename is not found
+empty_filename_check() {
+	[ -z "$filename" ] && echo "empty filename or $filename does not exist" && \
+		exit 1;
+}
+# if the keyword is empty; then
+empty_val_check() {
+	[ -z "$keyword" ] && echo "empty keyword" && usage && exit 1;
+}
+
+# prints out the entire list of hadiths
+list_function() {
+	[ ! -f "$outline_filename" ] && echo "$outline_filename not found" && exit 1;
+	sed -n "p" $outline_filename | $pager
+}
+
+# the basic/main search function
+search_function() {
+	# Apparently breaking awk code into multiple lines seem to be breaking the entire output, hence this looks ugly
+	awk -v word="$keyword" '/^Sahih\sal-Bukhari|^Sahih\sMuslim|^Sunan\san-Nasa|^Jami`\sat-Tirmidhi|^Sunan\sIbn\sMajah\s|^Sunan\sAbu\sDawud\s/ { IGNORECASE=1; inblock = 1; block = "" } inblock { IGNORECASE=1; block = block (block == "" ? "" : ORS) $0 } /^In-book\sreference\s\s/ && block ~ word { print block"\n"; inblock = 0 }' $filename | $pager
+}
+
+# hadith section search function
+hadith_search_function() {
+	# if the hadith search argument is not in the format of "bukhari 4";
+	# then exit
+	echo "$keyword" | grep -q "[[:alpha:]].*[[:digit:]]\+$"
+
+	if [ "$?" -ne 0 ]; then
+		echo
+		echo "syntax needs to be in the format of, hadith section followed by section number"
+		echo "An example - hadith -h 'bukhari 5'"
+		exit 1;
+	else
+		# Adding spaces at the end
+		hadith_string="$(echo "$keyword" | sed 's/\([[:digit:]].*$\)/\1 /g')"
+		# getting the starting line number
+		starting_line="$(grep -in -m 1 "$hadith_string" $filename | grep -o "^[[:digit:]]\+")"
+		# Printing upto x section
+		sed -n "${starting_line}, /^In-book reference\s\s/p" $filename | $pager
+	fi
+}
+
+# prints out an entire book section from a hadith
+book_section() {
+	# check if the format is correct
+	echo "$keyword" | grep -q "^[[:alpha:]].*[[:digit:]]\+$"
+
+	if [ "$?" -ne 0 ]; then
+		echo
+		echo "Syntax needs to be in the format of, section from hadith followed by book number"
+		echo "An example - hadith -b 'bukhari 5'"
+		exit 1;
+	else
+		# the section name that needs to be printed
+		section_name="$(echo "$keyword" | sed 's/^\(.*\)\s[[:digit:]]/\1/g')"
+		# the book number
+		book_number="$(echo "$keyword" | grep -o "[[:digit:]]\+")"
+		# so the starting line number would be
+		starting_line="$(grep -in -m 1 "^Book: $book_number .*$section_name" $filename | \
+			cut -f '1' -d ':')"
+		# printing upto x section
+		sed -n "${starting_line}, /^\*\*\*\*\*\*\*\*.*$/p" $filename | $pager
+	fi
+}
+# Entire hadith print function
+full_hadith_section() {
+	# check if the format is correct
+	echo $keyword | grep "[[:digit:]]\+"
+
+	if [ "$?" -eq "0" ]; then
+		echo
+		echo "Syntax needs to be in the correct format, this needs to be the name of the hadith only"
+		echo "An example - hadith -H 'bukhari'"
+		example
+		exit 1;
+	else
+		# properly formating the heading
+		heading="$(echo "$keyword" | sed 's/\(.*\)/\1 Starts here/g')"
+		# the starting line number
+		starting_line="$(grep -in -m 1 "$heading" $filename | grep -o "^[[:digit:]]\+")"
+		# and printing upto x section
+		sed -n "${starting_line}, /^________.*$/p" $filename | $pager
+	fi
+}
+
+# Case statements
+case "$1" in
+	""|" " ) # print usage if the first argument is empty
+		usage
+		;;
+	-s|--search ) # check for empty filename
+		empty_filename_check
+		# check if the second argument is empty
+		empty_val_check
+		# if everything is okay, then run the search function
+		search_function;
+		;;
+	-h|--hadith ) # check for empty filename
+		empty_filename_check
+		# check if he second argument is empty
+		empty_val_check
+		# if everything is okay, then run the hadith search function
+		hadith_search_function
+		;;
+	-b|--book ) # check for empty filename
+		empty_filename_check
+		# check for empty second argument
+		empty_val_check
+		# if everything is okay, then run the book print function
+		book_section
+		;;
+	-H|--Hadith ) # check for empty filename
+		empty_filename_check
+		# check for empty second argument
+		empty_val_check
+		# if everything is okay, then run the hadith function
+		full_hadith_section
+		;;
+	-l|--list ) # call the list function
+		list_function
+		;;
+	-eg|--example ) # call the example function
+		example
+		;;
+	* ) echo "Invalid argument"
+		usage && example
+		exit 1;
+		;;
+esac
