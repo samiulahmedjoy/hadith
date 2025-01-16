@@ -26,11 +26,13 @@ Here's a basic structure overview of the main-hadith.txt file
     |  |------- Book 1 of Sahih Al-Bukhari
     |    |------ Chapter 1 from Book 1 of Sahih Al-Bukhari
     |      |------- Hadith 1 from chapter 1
+    |
     Sahih Muslim
     |    
     |  |------- Book 1 of Sahih Muslim
     |    |------ Chapter 1 from Book 1 of Sahih Muslim
     |      |------- Hadith 1 from chapter 1
+    |
     Sunan an-Nasai
     |    
     |  |------- Book 1 of Sunan an-Nasai
