@@ -74,7 +74,7 @@ list_function() {
 # the basic/main search function
 search_function() {
 	# Apparently breaking awk code into multiple lines seem to be breaking the entire output, hence this looks ugly
-	awk -v word="$keyword" '/^Sahih\sal-Bukhari|^Sahih\sMuslim|^Sunan\san-Nasa|^Jami`\sat-Tirmidhi|^Sunan\sIbn\sMajah\s|^Sunan\sAbu\sDawud\s/ { IGNORECASE=1; inblock = 1; block = "" } inblock { IGNORECASE=1; block = block (block == "" ? "" : ORS) $0 } /^In-book\sreference\s\s/ && block ~ word { print block"\n"; inblock = 0 }' $filename | $pager
+	awk -v word="$keyword" '/^Sahih\sal-Bukhari|^Sahih\sMuslim|^Sunan\san-Nasa|^Jami`\sat-Tirmidhi|^Sunan\sIbn\sMajah\s|^Sunan\sAbu\sDawud\s/ { IGNORECASE=1; inblock = 1; block = "" } inblock { IGNORECASE=1; block = block (block == "" ? "" : ORS) $0 } /^In-book\sreference\s\s/ && block ~ word { print block"\n"; inblock = 0 }' $filename | $pager -sp $keyword
 }
 
 # hadith section search function
@@ -94,7 +94,7 @@ hadith_search_function() {
 		# getting the starting line number
 		starting_line="$(grep -in -m 1 "$hadith_string" $filename | grep -o "^[[:digit:]]\+")"
 		# Printing upto x section
-		sed -n "${starting_line}, /^In-book reference\s\s/p" $filename | $pager
+		sed -n "${starting_line}, /^In-book reference\s\s/p" $filename | $pager -sp $keyword
 	fi
 }
 
@@ -110,7 +110,7 @@ book_section() {
 		exit 1;
 	else
 		# the section name that needs to be printed
-		section_name="$(echo "$keyword" | sed 's/^\(.*\)\s[[:digit:]]/\1/g')"
+		section_name="$(echo "$keyword" | sed 's/^\(.*\)\s[[:digit:]]\+/\1/g')"
 		# the book number
 		book_number="$(echo "$keyword" | grep -o "[[:digit:]]\+")"
 		# so the starting line number would be
